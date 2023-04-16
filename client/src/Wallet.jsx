@@ -3,7 +3,7 @@ import server from "./server";
 import * as secp from "ethereum-cryptography/secp256k1";
 //this is how we usually see addresses, in hexadecimal format
 //change to ES6 import
-import toHex from "ethereum-cryptography/utils";
+import { toHex } from "ethereum-cryptography/utils";
 import { keccak256 } from "ethereum-cryptography/keccak";
 
 function Wallet({
@@ -16,32 +16,33 @@ function Wallet({
 }) {
   async function onChange(evt) {
     try {
-      console.log(evt.target.value);
+      setAddress("");
       const privateKey = evt.target.value;
-      if (!privateKey) return;
       setPrivateKey(privateKey);
 
       //this is how we see ethereums addresses
-      //we are generating the address from the private key
-      let address = secp.getPublicKey(privateKey);
-      address = address.slice(1);
-      address = keccak256(address);
-      address = hashedPubKey.slice(address.length - 20);
-      address = toHex(address);
-      console.log(address);
+      //we are generating the pubblic address from the private key
+      //in real world applications, we would not want to store the private key in any client
+      const publicKey = secp.getPublicKey(privateKey);
 
-      setAddress(address);
-      if (address) {
+      //this is how we see ethereums addresses
+      const formattedPubKey = publicKey.slice(1);
+      const hashedPubKey = keccak256(formattedPubKey);
+      const address = hashedPubKey.slice(hashedPubKey.length - 20);
+      const formattedAddress = toHex(address);
+      console.log("Public Key", formattedAddress);
+
+      setAddress(formattedAddress);
+      if (formattedAddress) {
         const {
           data: { balance },
-        } = await server.get(`balance/${address}`);
+        } = await server.get(`balance/${formattedAddress}`);
+        console.log(balance, "this is the balance");
         setBalance(balance);
       } else {
         setBalance(0);
       }
-    } catch (error) {
-      console.error(error);
-    }
+    } catch (error) {}
   }
 
   return (
@@ -54,7 +55,7 @@ function Wallet({
         Private Key
         <input
           placeholder="Type an address, for example: 0x1"
-          value={address}
+          value={privateKey}
           onChange={onChange}
         ></input>
       </label>

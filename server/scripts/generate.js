@@ -10,11 +10,9 @@ console.log("privateKey", toHex(privateKey));
 
 const publicKey = secp.getPublicKey(privateKey);
 
-console.log("publicKey", toHex(publicKey));
-
 //this is how we see ethereums addresses
 const formattedPubKey = publicKey.slice(1);
 const hashedPubKey = keccak256(formattedPubKey);
 const address = hashedPubKey.slice(hashedPubKey.length - 20);
 const formattedAddress = toHex(address);
-console.log(formattedAddress);
+console.log("Public Key", formattedAddress);
